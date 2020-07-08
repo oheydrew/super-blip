@@ -12,9 +12,7 @@ const MainLayout = ({ children }) => (
     }}
   >
     <Flex width={1} height="80%" justifyContent="center" alignItems="center">
-      <Box width={[1, 1, 7 / 8, 5 / 8]} bg="red">
-        {children}
-      </Box>
+      <Box width={[1, 1, 7 / 8, 5 / 8]}>{children}</Box>
     </Flex>
   </Box>
 );

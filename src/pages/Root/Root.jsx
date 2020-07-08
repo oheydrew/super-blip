@@ -1,20 +1,47 @@
-import React from 'react';
+import React, { useState } from 'react';
+import Tone from 'tone';
 
 import { MainLayout } from 'layouts';
-import { Flex } from 'rebass';
+import { Button, Flex } from 'rebass';
 
-const Root = () => (
-  <MainLayout>
-    <Flex width={1} p="8px" justifyContent="center">
-      Hello, there!
-    </Flex>
+const Root = () => {
+  const [toneStarted, setToneStarted] = useState(false);
 
-    <Flex width={1} p="8px" justifyContent="center" bg={['red', 'blue', 'pink', 'purple', 'green']}>
-      Let's try a thing...
-    </Flex>
+  const handleStartButton = async (event) => {
+    const synth = new Tone.MembraneSynth().toMaster();
 
-    <Flex></Flex>
-  </MainLayout>
-);
+    const loop = new Tone.Loop((time) => {
+      //triggered every eighth note.
+      console.log('Time:', time);
+      synth.triggerAttackRelease('C2', '2n');
+    }, '2n').start(0);
+
+    if (!toneStarted) {
+      await Tone.Transport.start();
+      setToneStarted(true);
+    } else {
+      await Tone.Transport.stop();
+      setToneStarted(false);
+    }
+
+    console.log(toneStarted);
+  };
+
+  return (
+    <MainLayout>
+      <Flex width={1} p="8px" justifyContent="center">
+        Hello, there!
+      </Flex>
+
+      <Flex width={1} p="8px" justifyContent="center">
+        <Button bg={!toneStarted ? '#08AEEA' : '#2AF598'} onClick={handleStartButton}>
+          {!toneStarted ? "Let's Do This" : 'Yeeeah!'}
+        </Button>
+      </Flex>
+
+      <Flex width={1}></Flex>
+    </MainLayout>
+  );
+};
 
 export { Root };
