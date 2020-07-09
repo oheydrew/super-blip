@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import Tone from 'tone';
+import { Flex } from 'rebass';
 
 import { MainLayout } from 'layouts';
-import { Button, Flex } from 'rebass';
+import { Button } from 'components/primitives';
 
 const Root = () => {
   const [toneStarted, setToneStarted] = useState(false);
