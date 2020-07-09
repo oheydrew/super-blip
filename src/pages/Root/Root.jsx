@@ -1,43 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Tone from 'tone';
 import { Flex } from 'rebass';
 
 import { MainLayout } from 'layouts';
-import { Button } from 'components/primitives';
+import { Button, Slider } from 'components/primitives';
+
+const synth = new Tone.MembraneSynth().toMaster();
+const loop = new Tone.Loop(time => {
+  //triggered every eighth note.
+  console.log('Time:', time);
+  synth.triggerAttackRelease('C2', '2n');
+}, '2n');
 
 const Root = () => {
-  const [toneStarted, setToneStarted] = useState(false);
+  const [transport, setTransport] = useState(false);
+  const [masterVolume, setMasterVolume] = useState(0.11);
+  const [masterMute, setMasterMute] = useState(false);
 
-  const handleStartButton = async (event) => {
-    const synth = new Tone.MembraneSynth().toMaster();
+  const { Master, Transport } = Tone;
 
-    const loop = new Tone.Loop((time) => {
-      //triggered every eighth note.
-      console.log('Time:', time);
-      synth.triggerAttackRelease('C2', '2n');
-    }, '2n').start(0);
+  useEffect(() => {
+    loop.start(0);
+  }, []);
 
-    if (!toneStarted) {
-      await Tone.Transport.start();
-      setToneStarted(true);
-    } else {
-      await Tone.Transport.stop();
-      setToneStarted(false);
+  useEffect(() => {
+    console.log({ transport });
+    if (!transport) {
+      Transport.stop();
+    } else if (transport) {
+      Transport.start();
     }
+  }, [transport]);
 
-    console.log(toneStarted);
+  useEffect(() => {
+    Master.mute = masterMute;
+  }, [masterMute]);
+
+  useEffect(() => {
+    console.log({ masterVolume });
+    Master.volume.value = masterVolume;
+  }, [masterVolume]);
+
+  const handleStartButton = async () => {
+    setTransport(transport => !transport);
   };
+
+  const handleMuteButton = () => setMasterMute(mute => !mute);
+  const handleVolumeChange = e => setMasterVolume(e.target.value);
 
   return (
     <MainLayout>
-      <Flex width={1} p="8px" justifyContent="center">
+      <Flex width={1} m="0.5em" justifyContent="center">
         Hello, there!
       </Flex>
 
-      <Flex width={1} p="8px" justifyContent="center">
-        <Button bg={!toneStarted ? '#08AEEA' : '#2AF598'} onClick={handleStartButton}>
-          {!toneStarted ? "Let's Do This" : 'Yeeeah!'}
-        </Button>
+      <Button m="0.5em" id="toneStart" bg={!transport ? '#08AEEA' : '#2AF598'} onClick={handleStartButton}>
+        {!transport ? "Let's Do This" : 'Yeeeah!'}
+      </Button>
+
+      <Button m="0.5em" id="masterMute" bg={!masterMute ? '#08AEEA' : '#2AF598'} onClick={handleMuteButton}>
+        {!masterMute ? 'On' : 'Off'}
+      </Button>
+
+      <Flex width={1 / 8} m="0.5em" justifyContent="center">
+        <Slider min="-80" max="10" step={3} onChange={handleVolumeChange}></Slider>
       </Flex>
 
       <Flex width={1}></Flex>
