@@ -55,11 +55,11 @@ const Root = () => {
       </Flex>
 
       <Button m="0.5em" id="toneStart" bg={!transport ? '#08AEEA' : '#2AF598'} onClick={handleStartButton}>
-        {!transport ? "Let's Do This" : 'Yeeeah!'}
+        {!transport ? "Let's Do This" : 'Yeeeah Blips!'}
       </Button>
 
       <Button m="0.5em" id="masterMute" bg={!masterMute ? '#08AEEA' : '#2AF598'} onClick={handleMuteButton}>
-        {!masterMute ? 'On' : 'Off'}
+        {!masterMute ? 'Unmuted' : 'Muted'}
       </Button>
 
       <Flex width={1 / 8} m="0.5em" justifyContent="center">
