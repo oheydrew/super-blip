@@ -63,7 +63,7 @@ const Root = () => {
       </Button>
 
       <Flex width={1 / 8} m="0.5em" justifyContent="center">
-        <Slider min="-80" max="10" step={3} onChange={handleVolumeChange}></Slider>
+        <Slider min="-80" max="0" step={3} onChange={handleVolumeChange}></Slider>
       </Flex>
 
       <Flex width={1}></Flex>
