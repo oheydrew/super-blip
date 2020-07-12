@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Tone from 'tone';
-import { Box, Flex } from 'rebass';
+import { Flex } from 'rebass';
 
 import { MainLayout } from 'layouts';
-import { Button, Fader } from 'components/primitives';
+import { Button } from 'components/primitives';
 import { Header } from './components/Header';
 
 const INSTRUMENT_PRESETS = [
@@ -64,19 +64,15 @@ const INSTRUMENT_PRESETS = [
         sustain: 1,
         release: 1,
       },
-      // harmonicity: 12,
       resonance: 800,
       modulationIndex: 20,
-      // envelope: {
-      //   decay: 0.4
-      // }
     },
   },
   {
     id: 'HighTone',
     engineType: 'Synth',
     engine: null,
-    note: 'C6',
+    note: 'D#5',
     length: '16n',
     config: {
       volume: -20,
@@ -86,12 +82,29 @@ const INSTRUMENT_PRESETS = [
         sustain: 1,
         release: 1,
       },
-      // harmonicity: 12,
       resonance: 800,
       modulationIndex: 20,
-      // envelope: {
-      //   decay: 0.4
-      // }
+    },
+  },
+  {
+    id: 'LowSaw',
+    engineType: 'Synth',
+    engine: null,
+    note: 'C1',
+    length: '8n',
+    config: {
+      volume: -20,
+      oscillator: {
+        type: 'sawtooth',
+      },
+      envelope: {
+        attack: 0.01,
+        decay: 0.1,
+        sustain: 1,
+        release: 1,
+      },
+      resonance: 800,
+      modulationIndex: 20,
     },
   },
 ];
@@ -106,19 +119,20 @@ const INITIAL_CHANNELS = [
   { arrangement: [0, 0, 1, 0, 0, 0, 1, 0], instrumentId: 'HighSynth' },
   { arrangement: [0, 1, 0, 1, 0, 1, 0, 1], instrumentId: 'MidTone' },
   { arrangement: [0, 1, 0, 1, 0, 1, 0, 1], instrumentId: 'HighTone' },
+  { arrangement: [0, 0, 1, 1, 0, 1, 1, 1], instrumentId: 'LowSaw' },
 ];
 
 const COLORS = [
   '#08AEEA',
-  '#FCB1C0',
+  '#60CFFB',
   '#F57AC8',
   '#9270FF',
-  '#60CFFB',
+  '#089B59',
   '#08AEEA',
-  '#FCB1C0',
+  '#60CFFB',
   '#F57AC8',
   '#9270FF',
-  '#60CFFB',
+  '#089B59',
 ];
 
 const initializeInstrumentEngines = presets =>
@@ -272,9 +286,11 @@ const Root = () => {
       </Flex>
 
       <Flex alignItems="center">
-        <Button m="0.5em" id="toneStart" bg={!playing ? '#08AEEA' : '#2AF598'} onClick={handleMoreBlips}>
-          {!playing ? 'Blip?' : 'Yeeeah! More Blips?'}
-        </Button>
+        {channels.length < 9 && (
+          <Button m="0.5em" id="toneStart" bg={!playing ? '#08AEEA' : '#2AF598'} onClick={handleMoreBlips}>
+            {!playing ? 'Blip?' : 'Yeeeah! More Blips?'}
+          </Button>
+        )}
 
         {channels.length > 1 && (
           <Button m="0.5em" id="toneStart" bg="#e67ad4" onClick={handleLessBlips}>
