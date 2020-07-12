@@ -7,8 +7,7 @@ module.exports = {
     'prettier/prettier': [
       'warn',
       {
-        semi: true,
-        trailingComma: none
+        semi: true
       }
     ]
   }

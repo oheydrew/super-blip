@@ -16,14 +16,14 @@ const Fader = props => (
       background: 'rgba(0,0,0,0.25)',
       // Thumb Button Specific
       '&::-webkit-slider-thumb': {
-        width: '.5em',
+        width: ['1.5em', '1em'],
         height: '1.75em',
-        background: '#08AEEA',
-        border: '1px solid rgba(0,0,0,0.25)',
-        borderRadius: '0.5em',
+        background: '#2AF598',
+        border: '1px solid rgba(0,0,0,0)',
+        borderRadius: '0.2em',
         cursor: 'pointer',
         '&:hover': {
-          background: '#2AF598',
+          background: '#08AEEA',
           border: '1px solid rgba(0,0,0,0.25)',
           transition: 'all .13s',
           transitionTimingFunction: 'ease-in-out'
