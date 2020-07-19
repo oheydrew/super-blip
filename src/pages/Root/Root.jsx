@@ -1,118 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import Tone from 'tone';
 import { Flex } from 'rebass';
+
+import { useTone } from 'audio/contexts/ToneContext';
+import { INSTRUMENT_PRESETS } from 'audio';
 
 import { MainLayout } from 'layouts';
 import { Button } from 'components/primitives';
 import { Header } from './components/Header';
-
-const INSTRUMENT_PRESETS = [
-  {
-    id: 'LowSynth',
-    engineType: 'MembraneSynth',
-    engine: null, // initialize with Tone Instrument (Engine) here
-    note: 'C1',
-    length: '16n',
-    config: {
-      volume: -10,
-      // oscillator: {
-      //   type: 'sawtooth'
-      // },
-      // filter: {
-      //   Q: 2,
-      //   type: 'bandpass',
-      //   rolloff: -24
-      // },
-      // envelope: {
-      //   attack: 0.01,
-      //   decay: 0.1,
-      //   sustain: 0.2,
-      //   release: 0.6
-      // },
-      // filterEnvelope: {
-      //   attack: 0.02,
-      //   decay: 0.4,
-      //   sustain: 1,
-      //   release: 0.7,
-      //   releaseCurve: 'linear',
-      //   baseFrequency: 20,
-      //   octaves: 5
-      // }
-    },
-  },
-  {
-    id: 'HighSynth',
-    engineType: 'MembraneSynth',
-    engine: null,
-    note: 'C4',
-    length: '4n',
-    config: {
-      volume: -10,
-    },
-  },
-  {
-    id: 'MidTone',
-    engineType: 'Synth',
-    engine: null,
-    note: 'C4',
-    length: '8n',
-    config: {
-      volume: -20,
-      envelope: {
-        attack: 0.01,
-        decay: 0.1,
-        sustain: 1,
-        release: 1,
-      },
-      resonance: 800,
-      modulationIndex: 20,
-    },
-  },
-  {
-    id: 'HighTone',
-    engineType: 'Synth',
-    engine: null,
-    note: 'D#5',
-    length: '16n',
-    config: {
-      volume: -20,
-      envelope: {
-        attack: 0.01,
-        decay: 0.1,
-        sustain: 1,
-        release: 1,
-      },
-      resonance: 800,
-      modulationIndex: 20,
-    },
-  },
-  {
-    id: 'LowSaw',
-    engineType: 'Synth',
-    engine: null,
-    note: 'C1',
-    length: '8n',
-    config: {
-      volume: -20,
-      oscillator: {
-        type: 'sawtooth',
-      },
-      envelope: {
-        attack: 0.01,
-        decay: 0.1,
-        sustain: 1,
-        release: 1,
-      },
-      resonance: 800,
-      modulationIndex: 20,
-    },
-  },
-];
-
-const PRESET_TO_TONE_INST = {
-  MembraneSynth: Tone.MembraneSynth,
-  Synth: Tone.Synth,
-};
 
 const INITIAL_CHANNELS = [
   { arrangement: [1, 0, 1, 0, 1, 0, 1, 0], instrumentId: 'LowSynth' },
@@ -124,30 +18,32 @@ const INITIAL_CHANNELS = [
 
 const COLORS = [
   '#08AEEA',
-  '#60CFFB',
-  '#F57AC8',
-  '#9270FF',
-  '#089B59',
-  '#08AEEA',
-  '#60CFFB',
-  '#F57AC8',
-  '#9270FF',
-  '#089B59',
+  '#0CB6E1',
+  '#10BED8',
+  '#13C6CF',
+  '#17CEC6',
+  '#1BD5BC',
+  '#1FDDB3',
+  '#22E5AA',
+  '#26EDA1',
+  '#2AF598',
 ];
 
-const initializeInstrumentEngines = presets =>
+const initializeInstrumentEngines = ({ toneJs, presets }) =>
   presets.map(instrument => {
-    const Synth = PRESET_TO_TONE_INST[instrument.engineType];
-    console.log(Synth);
+    const Synth = toneJs[instrument.engineType];
     return { ...instrument, engine: new Synth(instrument.config).toMaster() };
   });
 
 const Root = () => {
+  const Tone = useTone();
   const { Master, Transport } = Tone;
 
   // Track / Instrument State
   const [channels, setChannels] = useState(INITIAL_CHANNELS);
-  const [instruments] = useState(() => initializeInstrumentEngines(INSTRUMENT_PRESETS));
+  const [instruments] = useState(() =>
+    initializeInstrumentEngines({ toneJs: Tone, presets: INSTRUMENT_PRESETS })
+  );
 
   // ToneJS-Controlled Values
   const [playing, setPlaying] = useState(false);
@@ -253,7 +149,7 @@ const Root = () => {
                         height: ['3.5em', '4em'],
                         p: 0,
                         m: '0.5em',
-                        backgroundColor: noteVal ? COLORS[channelIndex] : '#2AF598',
+                        backgroundColor: noteVal ? COLORS[channelIndex] : COLORS[7 - channelIndex],
                         opacity: playHeadPosition === noteIndex ? 1 : 0.5,
                       }}
                       onClick={() => handleNoteClick({ channelIndex, noteIndex, noteVal })}
@@ -273,7 +169,7 @@ const Root = () => {
                         height: ['3.5em', '4em'],
                         p: 0,
                         m: '0.5em',
-                        backgroundColor: noteVal ? COLORS[channelIndex] : '#2AF598',
+                        backgroundColor: noteVal ? COLORS[channelIndex] : COLORS[9 - channelIndex],
                         opacity: playHeadPosition === noteIndex ? 1 : 0.5,
                       }}
                       onClick={() => handleNoteClick({ channelIndex, noteIndex, noteVal })}

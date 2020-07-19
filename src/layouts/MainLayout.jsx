@@ -6,9 +6,7 @@ const MainLayout = ({ header, footer, children, sx, ...props }) => (
     width={1}
     sx={{
       height: '100vh',
-      background: 'linear-gradient(0deg, #08AEEA 0%, #2AF598 100%)',
-      backgroundColor: '#08AEEA',
-      ...sx
+      ...sx,
     }}
     {...props}
   >
@@ -20,6 +18,7 @@ const MainLayout = ({ header, footer, children, sx, ...props }) => (
       <Flex
         p="1em"
         width={[1, 1, 7 / 8, 6 / 8]}
+        maxWidth={1024}
         flexDirection="column"
         justifyContent="center"
         alignItems="center"

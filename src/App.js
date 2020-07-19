@@ -1,6 +1,6 @@
 import React from 'react';
 import { Root } from 'pages';
-import { ToneProvider } from 'contexts/ToneContext';
+import { ToneProvider } from 'audio/contexts/ToneContext';
 
 const App = () => (
   <ToneProvider>
