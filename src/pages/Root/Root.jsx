@@ -5,15 +5,15 @@ import { useTone } from 'audio/contexts/ToneContext';
 import { INSTRUMENT_PRESETS } from 'audio';
 
 import { MainLayout } from 'layouts';
-import { Button } from 'components/primitives';
+import { Button, NoteButton } from 'components';
 import { Header } from './components/Header';
 
 const INITIAL_CHANNELS = [
-  { arrangement: [1, 0, 1, 0, 1, 0, 1, 0], instrumentId: 'LowSynth' },
-  { arrangement: [0, 0, 1, 0, 0, 0, 1, 0], instrumentId: 'HighSynth' },
-  { arrangement: [0, 1, 0, 1, 0, 1, 0, 1], instrumentId: 'MidTone' },
-  { arrangement: [0, 1, 0, 1, 0, 1, 0, 1], instrumentId: 'HighTone' },
-  { arrangement: [0, 0, 1, 1, 0, 1, 1, 1], instrumentId: 'LowSaw' },
+  { arrangement: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], instrumentId: 'LowSynth' },
+  { arrangement: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0], instrumentId: 'HighSynth' },
+  { arrangement: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1], instrumentId: 'MidTone' },
+  { arrangement: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1], instrumentId: 'HighTone' },
+  { arrangement: [0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1], instrumentId: 'LowSaw' },
 ];
 
 const COLORS = [
@@ -139,43 +139,16 @@ const Root = () => {
         {channels.map((channel, channelIndex) => (
           <Flex key={`channel${channelIndex}`} justifyContent="center" flexWrap="wrap">
             <Flex>
-              {channel.arrangement.map(
-                (noteVal, noteIndex) =>
-                  noteIndex < 4 && (
-                    <Button
-                      key={`note${noteIndex}`}
-                      sx={{
-                        width: ['3.5em', '4em'],
-                        height: ['3.5em', '4em'],
-                        p: 0,
-                        m: '0.5em',
-                        backgroundColor: noteVal ? COLORS[channelIndex] : COLORS[7 - channelIndex],
-                        opacity: playHeadPosition === noteIndex ? 1 : 0.5,
-                      }}
-                      onClick={() => handleNoteClick({ channelIndex, noteIndex, noteVal })}
-                    />
-                  )
-              )}
-            </Flex>
-
-            <Flex alignItems="center">
-              {channel.arrangement.map(
-                (noteVal, noteIndex) =>
-                  noteIndex > 3 && (
-                    <Button
-                      key={`note${noteIndex}`}
-                      sx={{
-                        width: ['3.5em', '4em'],
-                        height: ['3.5em', '4em'],
-                        p: 0,
-                        m: '0.5em',
-                        backgroundColor: noteVal ? COLORS[channelIndex] : COLORS[9 - channelIndex],
-                        opacity: playHeadPosition === noteIndex ? 1 : 0.5,
-                      }}
-                      onClick={() => handleNoteClick({ channelIndex, noteIndex, noteVal })}
-                    />
-                  )
-              )}
+              {channel.arrangement.map((noteVal, noteIndex) => (
+                <NoteButton
+                  key={`note${noteIndex}`}
+                  sx={{
+                    backgroundColor: noteVal ? COLORS[channelIndex] : COLORS[7 - channelIndex],
+                    opacity: playHeadPosition === noteIndex ? 1 : 0.4,
+                  }}
+                  onClick={() => handleNoteClick({ channelIndex, noteIndex, noteVal })}
+                />
+              ))}
             </Flex>
           </Flex>
         ))}

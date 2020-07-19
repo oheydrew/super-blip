@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Flex } from 'rebass';
-import { Button, Fader } from 'components/primitives';
+import { Button, Fader } from 'components';
 
 const Header = ({ handlePlayToggle, playing, masterVolume, setMasterVolume }) => {
   const [showVol, setShowVol] = useState(false);
