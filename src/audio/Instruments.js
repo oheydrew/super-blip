@@ -3,8 +3,6 @@ const INSTRUMENT_PRESETS = [
     id: 'LowSynth',
     engineType: 'MembraneSynth',
     engine: null, // initialize with Tone Instrument (Engine) here
-    note: 'C1',
-    length: '16n',
     config: {
       volume: -10,
       // oscillator: {
@@ -36,8 +34,6 @@ const INSTRUMENT_PRESETS = [
     id: 'HighSynth',
     engineType: 'MembraneSynth',
     engine: null,
-    note: 'C4',
-    length: '4n',
     config: {
       volume: -10,
     },
@@ -46,8 +42,6 @@ const INSTRUMENT_PRESETS = [
     id: 'MidTone',
     engineType: 'Synth',
     engine: null,
-    note: 'C4',
-    length: '8n',
     config: {
       volume: -20,
       envelope: {
@@ -64,8 +58,6 @@ const INSTRUMENT_PRESETS = [
     id: 'HighTone',
     engineType: 'Synth',
     engine: null,
-    note: 'D#5',
-    length: '16n',
     config: {
       volume: -20,
       envelope: {
@@ -82,8 +74,6 @@ const INSTRUMENT_PRESETS = [
     id: 'LowSaw',
     engineType: 'Synth',
     engine: null,
-    note: 'C1',
-    length: '8n',
     config: {
       volume: -20,
       oscillator: {

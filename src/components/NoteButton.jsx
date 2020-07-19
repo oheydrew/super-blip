@@ -7,8 +7,8 @@ const NoteButton = props => <StyledButton {...props} />;
 export { NoteButton };
 
 const StyledButton = styled(Button)`
-  width: 5vw;
-  height: 5vw;
+  width: 4vw;
+  height: 4vw;
   padding: 0;
-  margin: 0;
+  margin: 0.3em;
 `;

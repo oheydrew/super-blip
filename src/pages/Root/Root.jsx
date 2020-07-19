@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import chroma from 'chroma-js';
 import { Flex } from 'rebass';
 
 import { useTone } from 'audio/contexts/ToneContext';
@@ -9,31 +10,43 @@ import { Button, NoteButton } from 'components';
 import { Header } from './components/Header';
 
 const INITIAL_CHANNELS = [
-  { arrangement: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], instrumentId: 'LowSynth' },
-  { arrangement: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0], instrumentId: 'HighSynth' },
-  { arrangement: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1], instrumentId: 'MidTone' },
-  { arrangement: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1], instrumentId: 'HighTone' },
-  { arrangement: [0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1], instrumentId: 'LowSaw' },
+  {
+    arrangement: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+    instrumentId: 'LowSynth',
+    note: { pitch: 'C1', length: '16n' },
+  },
+  {
+    arrangement: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+    instrumentId: 'HighSynth',
+    note: { pitch: 'C4', length: '4n' },
+  },
+  {
+    arrangement: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+    instrumentId: 'MidTone',
+    note: { pitch: 'C4', length: '8n' },
+  },
+  {
+    arrangement: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+    instrumentId: 'HighTone',
+    note: { pitch: 'D#5', length: '16n' },
+  },
+  {
+    arrangement: [0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1],
+    instrumentId: 'LowSaw',
+    note: { pitch: 'C1', length: '8n' },
+  },
 ];
 
-const COLORS = [
-  '#08AEEA',
-  '#0CB6E1',
-  '#10BED8',
-  '#13C6CF',
-  '#17CEC6',
-  '#1BD5BC',
-  '#1FDDB3',
-  '#22E5AA',
-  '#26EDA1',
-  '#2AF598',
-];
+const COLORS = ['#08AEEA', '#2AF598'];
 
-const initializeInstrumentEngines = ({ toneJs, presets }) =>
-  presets.map(instrument => {
-    const Synth = toneJs[instrument.engineType];
-    return { ...instrument, engine: new Synth(instrument.config).toMaster() };
-  });
+const createInstrumentFromPreset = ({ toneJs, id, presetId = 'MidTone' }) => {
+  const instrument = INSTRUMENT_PRESETS.find(ipre => ipre.id === presetId);
+  const Synth = toneJs[instrument.engineType];
+  return { ...instrument, id, engine: new Synth(instrument.config).toMaster() };
+};
+
+const initializeInstruments = ({ toneJs, presets }) =>
+  presets.map(preset => createInstrumentFromPreset({ toneJs, id: preset.id, presetId: preset.id }));
 
 const Root = () => {
   const Tone = useTone();
@@ -41,8 +54,8 @@ const Root = () => {
 
   // Track / Instrument State
   const [channels, setChannels] = useState(INITIAL_CHANNELS);
-  const [instruments] = useState(() =>
-    initializeInstrumentEngines({ toneJs: Tone, presets: INSTRUMENT_PRESETS })
+  const [instruments, setInstruments] = useState(() =>
+    initializeInstruments({ toneJs: Tone, presets: INSTRUMENT_PRESETS })
   );
 
   // ToneJS-Controlled Values
@@ -51,6 +64,9 @@ const Root = () => {
 
   const [masterVolume, setMasterVolume] = useState(0);
   Master.volume.value = masterVolume; // TODO: Could refs be used here instead?
+
+  const noteColors = chroma.scale(['#E67AD5', '#FFD639']).mode('lab').colors(channels.length);
+  const blankColors = chroma.scale(['#2AF598', '#08AEEA']).mode('lab').colors(channels.length);
 
   useEffect(
     () => {
@@ -66,19 +82,23 @@ const Root = () => {
               const instrument = instruments.find(inst => channel.instrumentId === inst.id);
 
               console.log({ instrument });
-              const shot = instrument.engine.triggerAttackRelease(instrument.note, instrument.length, time);
+              const shot = instrument.engine.triggerAttackRelease(
+                channel.note.pitch,
+                channel.note.length,
+                time
+              );
               console.log({ shot });
               return null;
             }
             return null;
           });
         },
-        [0, 1, 2, 3, 4, 5, 6, 7], // Values to iterate over for currentPlayStep
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], // Values to iterate over for currentPlayStep
         '8n' // Length of time between steps
       ).start(0);
       return () => sequenceLoop.dispose(); // Callback to kill sequenceLoop
     },
-    [channels, instruments] // Retrigger when pattern changes
+    [channels, instruments, Tone.Sequence] // Retrigger when pattern changes
   );
 
   useEffect(() => {
@@ -107,12 +127,14 @@ const Root = () => {
       return handlePlayToggle();
     }
 
-    const randArrangement = [...Array(8)].map(() => Math.round(Math.random() - 0.2));
+    const newInstrument = createInstrumentFromPreset({ toneJs: Tone, id: `inst${instruments.length}` });
+    const randArrangement = [...Array(16)].map(() => Math.round(Math.random() - 0.2));
     const newChannel = {
       arrangement: randArrangement,
-      instrumentId: instruments[Math.floor(Math.random() * instruments.length)].id,
+      instrumentId: newInstrument.id,
     };
 
+    setInstruments(oldInstruments => [...oldInstruments, newInstrument]);
     setChannels(oldChannels => [...oldChannels, newChannel]);
   };
 
@@ -143,8 +165,8 @@ const Root = () => {
                 <NoteButton
                   key={`note${noteIndex}`}
                   sx={{
-                    backgroundColor: noteVal ? COLORS[channelIndex] : COLORS[7 - channelIndex],
-                    opacity: playHeadPosition === noteIndex ? 1 : 0.4,
+                    background: noteVal ? noteColors[channelIndex] : blankColors[channelIndex],
+                    opacity: playHeadPosition === noteIndex ? 1 : 0.5,
                   }}
                   onClick={() => handleNoteClick({ channelIndex, noteIndex, noteVal })}
                 />
