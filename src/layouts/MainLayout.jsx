@@ -5,7 +5,7 @@ const MainLayout = ({ header, footer, children, sx, ...props }) => (
   <Box
     width={1}
     sx={{
-      height: '100vh',
+      height: '100%',
       ...sx,
     }}
     {...props}
@@ -15,13 +15,7 @@ const MainLayout = ({ header, footer, children, sx, ...props }) => (
         {header}
       </Flex>
 
-      <Flex
-        p="1em"
-        width={[1, 1, 7 / 8, 6 / 8]}
-        flexDirection="column"
-        justifyContent="center"
-        alignItems="center"
-      >
+      <Flex p="1em" width={[1]} flexDirection="column" justifyContent="center" alignItems="center">
         {children}
       </Flex>
 

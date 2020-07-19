@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import chroma from 'chroma-js';
 import { Flex } from 'rebass';
 
 import { useTone } from 'audio/contexts/ToneContext';
 import { INSTRUMENT_PRESETS } from 'audio';
 
 import { MainLayout } from 'layouts';
-import { Button, NoteButton } from 'components';
-import { Header } from './components/Header';
+import { Button } from 'components';
+import { Header, Channel } from './components';
 
 const INITIAL_CHANNELS = [
   {
@@ -62,12 +61,6 @@ const Root = () => {
   const [playing, setPlaying] = useState(false);
   const [playHeadPosition, setPlayHeadPosition] = useState(0);
 
-  const [masterVolume, setMasterVolume] = useState(0);
-  Master.volume.value = masterVolume; // TODO: Could refs be used here instead?
-
-  const noteColors = chroma.scale(['#E67AD5', '#FFD639']).mode('lab').colors(channels.length);
-  const blankColors = chroma.scale(['#2AF598', '#08AEEA']).mode('lab').colors(channels.length);
-
   useEffect(
     () => {
       // Generates a Sequence (Loop of Events) from Tone.JS
@@ -101,14 +94,6 @@ const Root = () => {
     [channels, instruments, Tone.Sequence] // Retrigger when pattern changes
   );
 
-  useEffect(() => {
-    console.log({ playing });
-  }, [playing]);
-
-  useEffect(() => {
-    console.log({ masterVolume });
-  }, [masterVolume]);
-
   const handlePlayToggle = () => {
     Transport.toggle();
     setPlaying(playing => !playing);
@@ -127,11 +112,16 @@ const Root = () => {
       return handlePlayToggle();
     }
 
-    const newInstrument = createInstrumentFromPreset({ toneJs: Tone, id: `inst${instruments.length}` });
+    const newInstrument = createInstrumentFromPreset({
+      toneJs: Tone,
+      id: `inst${instruments.length}`,
+      presetId: ['MidTone', 'LowSaw'][Math.round(Math.random())],
+    });
     const randArrangement = [...Array(16)].map(() => Math.round(Math.random() - 0.2));
     const newChannel = {
       arrangement: randArrangement,
       instrumentId: newInstrument.id,
+      note: { pitch: 'C4', length: '8n' },
     };
 
     setInstruments(oldInstruments => [...oldInstruments, newInstrument]);
@@ -147,32 +137,19 @@ const Root = () => {
   };
 
   return (
-    <MainLayout
-      footer={
-        <Header
-          handlePlayToggle={handlePlayToggle}
-          playing={playing}
-          masterVolume={masterVolume}
-          setMasterVolume={setMasterVolume}
-        />
-      }
-    >
+    <MainLayout footer={<Header handlePlayToggle={handlePlayToggle} playing={playing} />}>
       <Flex width={1} m="0.5em" justifyContent="center" flexWrap="wrap">
         {channels.map((channel, channelIndex) => (
-          <Flex key={`channel${channelIndex}`} justifyContent="center" flexWrap="wrap">
-            <Flex>
-              {channel.arrangement.map((noteVal, noteIndex) => (
-                <NoteButton
-                  key={`note${noteIndex}`}
-                  sx={{
-                    background: noteVal ? noteColors[channelIndex] : blankColors[channelIndex],
-                    opacity: playHeadPosition === noteIndex ? 1 : 0.5,
-                  }}
-                  onClick={() => handleNoteClick({ channelIndex, noteIndex, noteVal })}
-                />
-              ))}
-            </Flex>
-          </Flex>
+          <Channel
+            width={1}
+            channel={channel}
+            setChannels={setChannels}
+            channelIndex={channelIndex}
+            instrument={instruments.find(inst => inst.id === channel.instrumentId)}
+            handleNoteClick={handleNoteClick}
+            totalChannels={channels.length}
+            playHeadPosition={playHeadPosition}
+          />
         ))}
       </Flex>
 
