@@ -1,8 +1,9 @@
 # 🔊 Super 'Blip' 🎉
+## [Blip on Netlify](https://super-blip.netlify.app/))
 
 It's a thing. It goes "Blip" a lot. It has a volume slider to de-blippify somewhat.
 
-I threw in some of my favourite UI packages (rebass & styled-system) with the intention of making this thing look pretty at some stage. If it goes beyond "Blip"
+I threw in some UI packages (rebass & styled-system) with the intention of making this thing look pretty at some stage. If it goes beyond "Blip"
 
 ## 🤔 What?
 
@@ -11,3 +12,5 @@ Wanted to play with [tone.js](https://tonejs.github.io/) - I've always been inte
 ## 🛠 What's Next?
 
 I have some ideas. Auto-generating music, basically. Tone.JS is pretty sweet - has a _ton_ of features to get up and running really quickly. I think this is going to be fun.
+
+Also - `a11y` & keyboard & tabbing & such. Gotta get onto that.
