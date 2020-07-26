@@ -2,41 +2,50 @@ import React, { useState, useEffect } from 'react';
 import { Flex } from 'rebass';
 
 import { useTone } from 'audio/contexts/ToneContext';
-import { INSTRUMENT_PRESETS } from 'audio';
+import { INSTRUMENT_PRESETS, generateScale } from 'audio';
 
 import { MainLayout } from 'layouts';
 import { Button } from 'components';
 import { Header, Channel } from './components';
 
+const rotate = ([head, ...tail]) => {
+  const newArr = [...tail, head];
+  return newArr;
+};
+
 const INITIAL_CHANNELS = [
+  // {
+  //   arrangement: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  //   instrumentId: 'SynthSine',
+  //   note: { root: 'C4', length: '8n' }
+  // },
   {
     arrangement: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
     instrumentId: 'MembraneLow',
-    note: { pitch: 'C1', length: '16n' },
+    note: { root: 'C1', length: '16n' },
   },
   {
     arrangement: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
     instrumentId: 'MembraneLow',
-    note: { pitch: 'C4', length: '4n' },
+    note: { root: 'C4', length: '4n' },
   },
   {
     arrangement: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-    instrumentId: 'SynthBasic',
-    note: { pitch: 'C4', length: '8n' },
+    instrumentId: 'SynthSine',
+    note: { root: 'D#5', length: '16n' },
   },
   {
     arrangement: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-    instrumentId: 'SynthBasic',
-    note: { pitch: 'D#5', length: '16n' },
+    instrumentId: 'SynthSine',
+    note: { root: 'C4', length: '8n' },
+    scale: generateScale({ rootNote: 'C', octave: 4, scaleType: 'Natural Minor' }),
   },
   {
     arrangement: [0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1],
-    instrumentId: 'LowSaw',
-    note: { pitch: 'C1', length: '8n' },
+    instrumentId: 'SynthSaw',
+    note: { root: 'C1', length: '8n' },
   },
 ];
-
-const COLORS = ['#08AEEA', '#2AF598'];
 
 const createInstrumentFromPreset = ({ toneJs, presetId = 'MidTone' }) => {
   const instrument = INSTRUMENT_PRESETS[presetId];
@@ -54,7 +63,7 @@ const initializeInstruments = ({ toneJs, presets }) =>
 
 const Root = () => {
   const Tone = useTone();
-  const { Master, Transport } = Tone;
+  const { Transport } = Tone;
 
   // Track / Instrument State
   const [channels, setChannels] = useState(INITIAL_CHANNELS);
@@ -74,17 +83,36 @@ const Root = () => {
           // Update active column for animation
           setPlayHeadPosition(currentPlayStep);
 
-          channels.map(({ note, instrumentId, arrangement }) => {
+          channels.map(({ note, scale, instrumentId, arrangement }, channelIndex) => {
             // Find note-on's from each channel's arrangement, and fire instrument
             if (arrangement[currentPlayStep]) {
               const instrument = instruments[instrumentId];
 
-              const noteTrigger = instrument.triggerAttackRelease(note.pitch, note.length, time);
+              const noteTrigger = instrument.triggerAttackRelease(
+                scale ? scale[0] : note.root,
+                note.length,
+                time
+              );
+
               console.log({ noteTrigger });
               return null;
             }
             return null;
           });
+
+          // rotate the scale for each channel, provided the note just played
+          setChannels(channels =>
+            channels.map(channel => {
+              if (!channel.arrangement[currentPlayStep] || !channel.scale) {
+                return channel;
+              }
+
+              return {
+                ...channel,
+                scale: rotate(channel.scale),
+              };
+            })
+          );
         },
         [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], // Values to iterate over for currentPlayStep
         '8n' // Length of time between steps
@@ -108,9 +136,11 @@ const Root = () => {
   };
 
   const handleMoreBlips = () => {
+    const presetIds = Object.keys(INSTRUMENT_PRESETS);
+
     const newInstrument = createInstrumentFromPreset({
       toneJs: Tone,
-      presetId: Object.keys(INSTRUMENT_PRESETS)[Math.round(Math.random())],
+      presetId: presetIds[Math.floor(Math.random() * presetIds.length)],
     });
     const instrumentId = `${newInstrument.presetId}__channel_${channels.length}`;
     const randArrangement = [...Array(16)].map(() => Math.round(Math.random() - 0.2));
@@ -118,7 +148,7 @@ const Root = () => {
     const newChannel = {
       arrangement: randArrangement,
       instrumentId: instrumentId,
-      note: { pitch: 'C4', length: '8n' },
+      note: { root: 'C4', length: '8n' },
     };
 
     setInstruments(oldInstruments => ({ ...oldInstruments, [instrumentId]: newInstrument }));

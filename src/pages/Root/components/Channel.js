@@ -3,7 +3,7 @@ import { useTone } from 'audio/contexts/ToneContext';
 import chroma from 'chroma-js';
 import { Flex } from 'rebass';
 
-import { NoteButton, Button, Fader } from 'components';
+import { NoteButton, Button, ToneFader } from 'components';
 
 const Channel = ({
   channel,
@@ -69,12 +69,57 @@ const Channel = ({
       </Flex>
 
       {showControls && (
-        <Flex width={[1, 6 / 8]} justifyContent="flex-end" alignItems="center" height="30px">
+        <Flex width={[1, 7 / 8]} justifyContent="flex-end" alignItems="center" height="30px">
+          <ToneFader
+            width={[1 / 12, 1 / 16]}
+            label="Atk"
+            instrument={instrument.envelope}
+            property="attack"
+            min="0.001"
+            max="2"
+            step={0.01}
+          />
+          <ToneFader
+            width={[1 / 12, 1 / 16]}
+            label="Dcy"
+            instrument={instrument.envelope}
+            property="decay"
+            min="0"
+            max="2"
+            step={0.01}
+          />
+          <ToneFader
+            width={[1 / 12, 1 / 16]}
+            label="Sus"
+            instrument={instrument.envelope}
+            property="sustain"
+            min="0"
+            max="2"
+            step={0.01}
+          />
+          <ToneFader
+            width={[1 / 12, 1 / 16]}
+            label="Rel"
+            instrument={instrument.envelope}
+            property="release"
+            min="0"
+            max="2"
+            step={0.01}
+          />
+
           {!(instrument instanceof Tone.MembraneSynth) && (
-            <Fader label="freq" min="20" max="1000" step={12} toneJsProperty={instrument.frequency} />
+            <ToneFader
+              width={[1 / 12, 1 / 16]}
+              label="freq"
+              min="20"
+              max="1000"
+              step={12}
+              instrument={instrument}
+              property="frequency"
+            />
           )}
 
-          <Fader label="vol" toneJsProperty={instrument.volume} />
+          <ToneFader label="vol" instrument={instrument} property="volume" />
         </Flex>
       )}
     </Flex>

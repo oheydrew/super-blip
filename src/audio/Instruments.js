@@ -3,7 +3,7 @@ const INSTRUMENT_PRESETS = {
     name: 'MembraneSynth',
     volume: -12,
   },
-  SynthBasic: {
+  SynthSine: {
     name: 'Synth',
     volume: -18,
     envelope: {
@@ -12,10 +12,8 @@ const INSTRUMENT_PRESETS = {
       sustain: 1,
       release: 1,
     },
-    resonance: 800,
-    modulationIndex: 20,
   },
-  LowSaw: {
+  SynthSaw: {
     name: 'Synth',
     volume: -18,
     oscillator: {
@@ -27,8 +25,6 @@ const INSTRUMENT_PRESETS = {
       sustain: 1,
       release: 1,
     },
-    resonance: 800,
-    modulationIndex: 20,
   },
 };
 
