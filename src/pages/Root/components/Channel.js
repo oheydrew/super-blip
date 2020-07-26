@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTone } from 'audio/contexts/ToneContext';
 import chroma from 'chroma-js';
 import { Flex } from 'rebass';
 
@@ -14,6 +15,8 @@ const Channel = ({
   playHeadPosition,
   ...props
 }) => {
+  const Tone = useTone();
+
   const [showControls, setShowControls] = useState(false);
 
   const noteColors = chroma.scale(['#E67AD5', '#FFD639']).mode('lab').colors(totalChannels);
@@ -67,10 +70,11 @@ const Channel = ({
 
       {showControls && (
         <Flex width={[1, 6 / 8]} justifyContent="flex-end" alignItems="center" height="30px">
-          {instrument.engineType === 'Synth' && (
-            <Fader label="freq" min="20" max="1000" step={12} toneJsProperty={instrument.engine.frequency} />
+          {!(instrument instanceof Tone.MembraneSynth) && (
+            <Fader label="freq" min="20" max="1000" step={12} toneJsProperty={instrument.frequency} />
           )}
-          <Fader label="vol" toneJsProperty={instrument.engine.volume} />
+
+          <Fader label="vol" toneJsProperty={instrument.volume} />
         </Flex>
       )}
     </Flex>

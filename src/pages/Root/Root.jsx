@@ -11,22 +11,22 @@ import { Header, Channel } from './components';
 const INITIAL_CHANNELS = [
   {
     arrangement: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-    instrumentId: 'LowSynth',
+    instrumentId: 'MembraneLow',
     note: { pitch: 'C1', length: '16n' },
   },
   {
     arrangement: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
-    instrumentId: 'HighSynth',
+    instrumentId: 'MembraneLow',
     note: { pitch: 'C4', length: '4n' },
   },
   {
     arrangement: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-    instrumentId: 'MidTone',
+    instrumentId: 'SynthBasic',
     note: { pitch: 'C4', length: '8n' },
   },
   {
     arrangement: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-    instrumentId: 'HighTone',
+    instrumentId: 'SynthBasic',
     note: { pitch: 'D#5', length: '16n' },
   },
   {
@@ -38,14 +38,19 @@ const INITIAL_CHANNELS = [
 
 const COLORS = ['#08AEEA', '#2AF598'];
 
-const createInstrumentFromPreset = ({ toneJs, id, presetId = 'MidTone' }) => {
-  const instrument = INSTRUMENT_PRESETS.find(ipre => ipre.id === presetId);
-  const Synth = toneJs[instrument.engineType];
-  return { ...instrument, id, engine: new Synth(instrument.config).toMaster() };
+const createInstrumentFromPreset = ({ toneJs, presetId = 'MidTone' }) => {
+  const instrument = INSTRUMENT_PRESETS[presetId];
+  const Synth = toneJs[instrument.name];
+  return new Synth(instrument).toMaster();
 };
 
 const initializeInstruments = ({ toneJs, presets }) =>
-  presets.map(preset => createInstrumentFromPreset({ toneJs, id: preset.id, presetId: preset.id }));
+  Object.keys(presets).reduce((acc, presetId) => {
+    return {
+      ...acc,
+      [presetId]: createInstrumentFromPreset({ toneJs, presetId: presetId }),
+    };
+  }, {});
 
 const Root = () => {
   const Tone = useTone();
@@ -69,18 +74,13 @@ const Root = () => {
           // Update active column for animation
           setPlayHeadPosition(currentPlayStep);
 
-          channels.map(channel => {
+          channels.map(({ note, instrumentId, arrangement }) => {
             // Find note-on's from each channel's arrangement, and fire instrument
-            if (channel.arrangement[currentPlayStep]) {
-              const instrument = instruments.find(inst => channel.instrumentId === inst.id);
+            if (arrangement[currentPlayStep]) {
+              const instrument = instruments[instrumentId];
 
-              console.log({ instrument });
-              const shot = instrument.engine.triggerAttackRelease(
-                channel.note.pitch,
-                channel.note.length,
-                time
-              );
-              console.log({ shot });
+              const noteTrigger = instrument.triggerAttackRelease(note.pitch, note.length, time);
+              console.log({ noteTrigger });
               return null;
             }
             return null;
@@ -108,23 +108,20 @@ const Root = () => {
   };
 
   const handleMoreBlips = () => {
-    if (!playing) {
-      return handlePlayToggle();
-    }
-
     const newInstrument = createInstrumentFromPreset({
       toneJs: Tone,
-      id: `inst${instruments.length}`,
-      presetId: ['MidTone', 'LowSaw'][Math.round(Math.random())],
+      presetId: Object.keys(INSTRUMENT_PRESETS)[Math.round(Math.random())],
     });
+    const instrumentId = `${newInstrument.presetId}__channel_${channels.length}`;
     const randArrangement = [...Array(16)].map(() => Math.round(Math.random() - 0.2));
+
     const newChannel = {
       arrangement: randArrangement,
-      instrumentId: newInstrument.id,
+      instrumentId: instrumentId,
       note: { pitch: 'C4', length: '8n' },
     };
 
-    setInstruments(oldInstruments => [...oldInstruments, newInstrument]);
+    setInstruments(oldInstruments => ({ ...oldInstruments, [instrumentId]: newInstrument }));
     setChannels(oldChannels => [...oldChannels, newChannel]);
   };
 
@@ -141,11 +138,12 @@ const Root = () => {
       <Flex width={1} m="0.5em" justifyContent="center" flexWrap="wrap">
         {channels.map((channel, channelIndex) => (
           <Channel
+            key={`channel_${channelIndex}`}
             width={1}
             channel={channel}
             setChannels={setChannels}
             channelIndex={channelIndex}
-            instrument={instruments.find(inst => inst.id === channel.instrumentId)}
+            instrument={instruments[channel.instrumentId]}
             handleNoteClick={handleNoteClick}
             totalChannels={channels.length}
             playHeadPosition={playHeadPosition}
@@ -156,7 +154,7 @@ const Root = () => {
       <Flex alignItems="center">
         {channels.length < 9 && (
           <Button m="0.5em" id="toneStart" bg={!playing ? '#08AEEA' : '#2AF598'} onClick={handleMoreBlips}>
-            {!playing ? 'Blip?' : 'Yeeeah! More Blips?'}
+            {!playing ? 'More Blip?' : 'Yeeeah! More Blips?'}
           </Button>
         )}
 
