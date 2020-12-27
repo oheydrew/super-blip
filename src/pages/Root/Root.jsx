@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Flex } from 'rebass';
 
 import { useTone } from 'audio/contexts/ToneContext';
-import { INSTRUMENT_PRESETS, generateScale } from 'audio';
+import { INSTRUMENT_PRESETS, initializeInstruments, createInstrumentFromPreset, generateScale } from 'audio';
 
 import { MainLayout } from 'layouts';
 import { Button } from 'components';
@@ -47,36 +47,23 @@ const INITIAL_CHANNELS = [
   },
 ];
 
-const createInstrumentFromPreset = ({ toneJs, presetId = 'MidTone' }) => {
-  const instrument = INSTRUMENT_PRESETS[presetId];
-  const Synth = toneJs[instrument.name];
-  return new Synth(instrument).toMaster();
-};
-
-const initializeInstruments = ({ toneJs, presets }) =>
-  Object.keys(presets).reduce((acc, presetId) => {
-    return {
-      ...acc,
-      [presetId]: createInstrumentFromPreset({ toneJs, presetId: presetId }),
-    };
-  }, {});
-
 const Root = () => {
   const Tone = useTone();
   const { Transport } = Tone;
 
   // Track / Instrument State
   const [channels, setChannels] = useState(INITIAL_CHANNELS);
-  const [instruments, setInstruments] = useState(() =>
-    initializeInstruments({ toneJs: Tone, presets: INSTRUMENT_PRESETS })
-  );
+  const [instruments, setInstruments] = useState(() => initializeInstruments({ toneJs: Tone }));
 
   // ToneJS-Controlled Values
   const [playing, setPlaying] = useState(false);
   const [playHeadPosition, setPlayHeadPosition] = useState(0);
 
+  useEffect(() => console.log({ playHeadPosition }), [playHeadPosition]);
+
   useEffect(
     () => {
+      console.log('useEffect Trigger');
       // Generates a Sequence (Loop of Events) from Tone.JS
       const sequenceLoop = new Tone.Sequence(
         (time, currentPlayStep) => {
@@ -89,7 +76,7 @@ const Root = () => {
               const instrument = instruments[instrumentId];
 
               const noteTrigger = instrument.triggerAttackRelease(
-                scale ? scale[0] : note.root,
+                scale ? scale[currentPlayStep] : note.root,
                 note.length,
                 time
               );
@@ -100,26 +87,26 @@ const Root = () => {
             return null;
           });
 
-          // rotate the scale for each channel, provided the note just played
-          setChannels(channels =>
-            channels.map(channel => {
-              if (!channel.arrangement[currentPlayStep] || !channel.scale) {
-                return channel;
-              }
+          // // rotate the scale for each channel, provided the note just played
+          // setChannels(channels =>
+          //   channels.map(channel => {
+          //     if (!channel.arrangement[currentPlayStep] || !channel.scale) {
+          //       return channel;
+          //     }
 
-              return {
-                ...channel,
-                scale: rotate(channel.scale),
-              };
-            })
-          );
+          //     return {
+          //       ...channel,
+          //       scale: rotate(channel.scale),
+          //     };
+          //   })
+          // );
         },
         [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], // Values to iterate over for currentPlayStep
         '8n' // Length of time between steps
       ).start(0);
       return () => sequenceLoop.dispose(); // Callback to kill sequenceLoop
     },
-    [channels, instruments, Tone.Sequence] // Retrigger when pattern changes
+    [] // Retrigger when pattern changes
   );
 
   const handlePlayToggle = () => {
@@ -136,11 +123,9 @@ const Root = () => {
   };
 
   const handleMoreBlips = () => {
-    const presetIds = Object.keys(INSTRUMENT_PRESETS);
-
     const newInstrument = createInstrumentFromPreset({
       toneJs: Tone,
-      presetId: presetIds[Math.floor(Math.random() * presetIds.length)],
+      presetId: INSTRUMENT_PRESETS[Math.floor(Math.random() * INSTRUMENT_PRESETS.length)].presetId,
     });
     const instrumentId = `${newInstrument.presetId}__channel_${channels.length}`;
     const randArrangement = [...Array(16)].map(() => Math.round(Math.random() - 0.2));

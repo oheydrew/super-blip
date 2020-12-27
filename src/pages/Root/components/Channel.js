@@ -22,41 +22,27 @@ const Channel = ({
   const noteColors = chroma.scale(['#E67AD5', '#FFD639']).mode('lab').colors(totalChannels);
   const blankColors = chroma.scale(['#2AF598', '#08AEEA']).mode('lab').colors(totalChannels);
 
+  console.log('playhead@note', playHeadPosition);
+
   return (
     <Flex key={`channel${channelIndex}`} justifyContent="center" flexWrap="wrap" {...props}>
       <Flex alignItems="center">
-        <Flex width={1} flexWrap="wrap">
-          <Flex width={[1, 1 / 2]} justifyContent="center">
-            {channel.arrangement.map(
-              (noteVal, noteIndex) =>
-                noteIndex < 8 && (
-                  <NoteButton
-                    key={`note${noteIndex}`}
-                    onClick={() => handleNoteClick({ channelIndex, noteIndex, noteVal })}
-                    sx={{
-                      background: noteVal ? noteColors[channelIndex] : blankColors[channelIndex],
-                      opacity: playHeadPosition === noteIndex ? 1 : 0.5,
-                    }}
-                  />
-                )
-            )}
-          </Flex>
-
-          <Flex width={[1, 1 / 2]} justifyContent="center">
-            {channel.arrangement.map(
-              (noteVal, noteIndex) =>
-                noteIndex >= 8 && (
-                  <NoteButton
-                    key={`note${noteIndex}`}
-                    onClick={() => handleNoteClick({ channelIndex, noteIndex, noteVal })}
-                    sx={{
-                      background: noteVal ? noteColors[channelIndex] : blankColors[channelIndex],
-                      opacity: playHeadPosition === noteIndex ? 1 : 0.5,
-                    }}
-                  />
-                )
-            )}
-          </Flex>
+        <Flex
+          width={['14em', '30em', '30em', '60em']}
+          minWidth="14em"
+          justifyContent="center"
+          flexWrap="wrap"
+        >
+          {channel.arrangement.map((noteVal, noteIndex) => (
+            <NoteButton
+              key={`note${noteIndex}`}
+              onClick={() => handleNoteClick({ channelIndex, noteIndex, noteVal })}
+              sx={{
+                background: noteVal ? noteColors[channelIndex] : blankColors[channelIndex],
+                opacity: playHeadPosition === noteIndex ? 1 : 0.5,
+              }}
+            />
+          ))}
         </Flex>
 
         <Button

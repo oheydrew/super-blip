@@ -1,9 +1,15 @@
-const INSTRUMENT_PRESETS = {
-  MembraneLow: {
+// Preset values for creating ToneJS Instruments.
+// 'presetId' is the name of the instrument used by a Channel
+// All other keys are ToneJS Specific
+
+const INSTRUMENT_PRESETS = [
+  {
+    presetId: 'MembraneLow',
     name: 'MembraneSynth',
     volume: -12,
   },
-  SynthSine: {
+  {
+    presetId: 'SynthSine',
     name: 'Synth',
     volume: -18,
     envelope: {
@@ -13,7 +19,8 @@ const INSTRUMENT_PRESETS = {
       release: 1,
     },
   },
-  SynthSaw: {
+  {
+    presetId: 'SynthSaw',
     name: 'Synth',
     volume: -18,
     oscillator: {
@@ -26,9 +33,23 @@ const INSTRUMENT_PRESETS = {
       release: 1,
     },
   },
+];
+
+const createInstrumentFromPreset = ({ toneJs, presetId = 'MidTone' }) => {
+  const preset = INSTRUMENT_PRESETS.find(preset => preset.presetId === presetId);
+  const Instrument = toneJs[preset.name];
+  return new Instrument(preset).toMaster();
 };
 
-export { INSTRUMENT_PRESETS };
+const initializeInstruments = ({ toneJs }) =>
+  INSTRUMENT_PRESETS.reduce((acc, { presetId }) => {
+    return {
+      ...acc,
+      [presetId]: createInstrumentFromPreset({ toneJs, presetId: presetId }),
+    };
+  }, {});
+
+export { INSTRUMENT_PRESETS, initializeInstruments, createInstrumentFromPreset };
 
 // volume: -12
 // oscillator: {
