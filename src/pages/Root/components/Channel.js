@@ -13,6 +13,7 @@ const Channel = ({
   handleNoteClick,
   totalChannels,
   playHeadPosition,
+  mouseDown,
   ...props
 }) => {
   const Tone = useTone();
@@ -21,8 +22,6 @@ const Channel = ({
 
   const noteColors = chroma.scale(['#E67AD5', '#FFD639']).mode('lab').colors(totalChannels);
   const blankColors = chroma.scale(['#2AF598', '#08AEEA']).mode('lab').colors(totalChannels);
-
-  console.log('playhead@note', playHeadPosition);
 
   return (
     <Flex key={`channel${channelIndex}`} justifyContent="center" flexWrap="wrap" {...props}>
@@ -36,7 +35,10 @@ const Channel = ({
           {channel.arrangement.map((noteVal, noteIndex) => (
             <NoteButton
               key={`note${noteIndex}`}
-              onClick={() => handleNoteClick({ channelIndex, noteIndex, noteVal })}
+              onMouseDown={() => handleNoteClick({ channelIndex, noteIndex, noteVal })}
+              onMouseEnter={() => {
+                mouseDown.current && handleNoteClick({ channelIndex, noteIndex, noteVal });
+              }}
               sx={{
                 background: noteVal ? noteColors[channelIndex] : blankColors[channelIndex],
                 opacity: playHeadPosition === noteIndex ? 1 : 0.5,

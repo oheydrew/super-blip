@@ -4,12 +4,12 @@
 
 const INSTRUMENT_PRESETS = [
   {
-    presetId: 'MembraneLow',
+    id: 'MembraneLow',
     name: 'MembraneSynth',
     volume: -12,
   },
   {
-    presetId: 'SynthSine',
+    id: 'SynthSine',
     name: 'Synth',
     volume: -18,
     envelope: {
@@ -20,7 +20,18 @@ const INSTRUMENT_PRESETS = [
     },
   },
   {
-    presetId: 'SynthSaw',
+    id: 'SynthSine2',
+    name: 'Synth',
+    volume: -18,
+    envelope: {
+      attack: 0.01,
+      decay: 0.1,
+      sustain: 1.5,
+      release: 1.5,
+    },
+  },
+  {
+    id: 'SynthSaw',
     name: 'Synth',
     volume: -18,
     oscillator: {
@@ -36,20 +47,24 @@ const INSTRUMENT_PRESETS = [
 ];
 
 const createInstrumentFromPreset = ({ toneJs, presetId = 'MidTone' }) => {
-  const preset = INSTRUMENT_PRESETS.find(preset => preset.presetId === presetId);
+  const preset = INSTRUMENT_PRESETS.find(preset => preset.id === presetId);
   const Instrument = toneJs[preset.name];
+
   return new Instrument(preset).toMaster();
 };
 
-const initializeInstruments = ({ toneJs }) =>
-  INSTRUMENT_PRESETS.reduce((acc, { presetId }) => {
+const initializeInstruments = ({ toneJs, channels }) =>
+  channels.reduce((acc, { id, presetId }) => {
     return {
       ...acc,
-      [presetId]: createInstrumentFromPreset({ toneJs, presetId: presetId }),
+      [id]: createInstrumentFromPreset({ toneJs, presetId: presetId }),
     };
   }, {});
 
-export { INSTRUMENT_PRESETS, initializeInstruments, createInstrumentFromPreset };
+const addInstrument = ({ newInstrument, setInstruments, channelId }) =>
+  setInstruments(instruments => ({ ...instruments, [channelId]: newInstrument }));
+
+export { INSTRUMENT_PRESETS, initializeInstruments, createInstrumentFromPreset, addInstrument };
 
 // volume: -12
 // oscillator: {

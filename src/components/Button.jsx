@@ -10,6 +10,7 @@ const StyledButton = styled(RebassButton)`
   color: #111;
   box-shadow: 0px 0px 5px 2px rgba(0, 0, 0, 0.01);
   border: 1px solid rgba(0, 0, 0, 0);
+  border-radius: 10em;
   transition: all 0.13s;
   transition-timing-function: ease-in-out;
   outline: none;
