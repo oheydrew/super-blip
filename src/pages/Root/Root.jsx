@@ -60,7 +60,7 @@ const createSequence = ({ channels, instruments, setPlayHeadPosition }) =>
           console.log(channelId, frequency);
 
           const noteTrigger = instrument.triggerAttackRelease(
-            scale ? scale[currentPlayStep] : frequency ? frequency : note.root,
+            scale ? scale[currentPlayStep] : note.root,
             note.length,
             time
           );
