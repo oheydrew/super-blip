@@ -1,65 +1,71 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Flex } from 'rebass';
+import chroma from 'chroma-js';
+import Tone from 'tone';
+import styled from 'styled-components';
 
-import { useTone } from 'audio/contexts/ToneContext';
 import { INSTRUMENT_PRESETS, initializeInstruments, createInstrumentFromPreset, generateScale } from 'audio';
+import { useTransport } from 'contexts/TransportContext';
 
 import { MainLayout } from 'layouts';
 import { Button } from 'components';
 import { Header, Channel } from './components';
 
+// 🥾 AND 🐈 AND 🐝 Bees AND https://www.youtube.com/watch?v=Nni0rTLg5B8
 const INITIAL_CHANNELS = [
   {
-    id: 'kick',
+    id: 'BOOTS 🥾',
     arrangement: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
     presetId: 'MembraneLow',
     note: { root: 'C1', length: '16n' },
   },
   {
-    id: 'snare',
-    arrangement: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
-    presetId: 'MembraneLow',
-    note: { root: 'C4', length: '4n' },
-  },
-  {
-    id: 'hat',
+    id: 'AND 🎩',
     arrangement: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
     presetId: 'SynthSine',
     note: { root: 'D#5', length: '16n' },
   },
   {
-    id: 'lead',
-    arrangement: [0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1],
+    id: 'CATS 🐈',
+    arrangement: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+    presetId: 'MembraneLow',
+    note: { root: 'C4', length: '4n' },
+  },
+  {
+    id: 'KNEEHIGH 👢',
+    arrangement: [0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1],
     presetId: 'SynthSine2',
     note: { root: 'C4', length: '8n' },
     scale: generateScale({ rootNote: 'C', octave: 4, scaleType: 'Natural Minor' }),
   },
   {
-    id: 'saw',
+    id: 'BEES 🐝',
     arrangement: [0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1],
     presetId: 'SynthSaw',
     note: { root: 'C1', length: '8n' },
   },
 ];
 
-const createSequence = ({ Sequence, channels, instruments, setPlayHeadPosition }) =>
-  new Sequence(
+const createSequence = ({ channels, instruments, setPlayHeadPosition }) =>
+  new Tone.Sequence(
     (time, currentPlayStep) => {
       // Update active column for animation
       setPlayHeadPosition(currentPlayStep);
 
-      channels.map(({ id: channelId, note, scale, arrangement }, channelIndex) => {
+      channels.map(({ id: channelId, note, scale, arrangement }) => {
         // Find note-on's from each channel's arrangement, and fire instrument
         if (arrangement[currentPlayStep]) {
           const instrument = instruments[channelId];
+          const frequency = instrument.get('frequency')['frequency'] || null;
+          console.log(channelId, frequency);
 
           const noteTrigger = instrument.triggerAttackRelease(
-            scale ? scale[currentPlayStep] : note.root,
+            scale ? scale[currentPlayStep] : frequency ? frequency : note.root,
             note.length,
             time
           );
 
-          console.log({ noteTrigger });
+          console.log(`Note: ${channelId}`, { noteTrigger });
           return null;
         }
         return null;
@@ -70,47 +76,27 @@ const createSequence = ({ Sequence, channels, instruments, setPlayHeadPosition }
   );
 
 const Root = () => {
-  const Tone = useTone();
-  const { Transport, Sequence } = Tone;
-
   // Track / Instrument State
   const initialChannels = JSON.parse(JSON.stringify(INITIAL_CHANNELS));
   const [channels, setChannels] = useState(initialChannels);
-  const [instruments, setInstruments] = useState(() =>
-    initializeInstruments({ toneJs: Tone, channels: initialChannels })
-  );
+  const [instruments, setInstruments] = useState(() => initializeInstruments({ channels: initialChannels }));
 
-  // ToneJS-Controlled Values
-  const [playing, setPlaying] = useState(false);
-  const [playHeadPosition, setPlayHeadPosition] = useState(0);
-
-  // TODO: Functional / Data repository style Idea:
-  // channel: { id, arrangement, note/scale } - Individual channel info
-  // channels: { [channel.id]: channel, [channel.id]: channel, ... } - Data only: All channel storage
-  // instruments: [ [channel.id]: ToneInstrument, [channel.id]: ToneInstrument, ... ] - ToneJS Instrument Instance Store
-  // sequences: [ [channel.id]: ToneSequence(channel), [channel.id]: ToneSequence(channel), ...] - ToneJS Sequence Instance Store
-  //
-  // Channels could reference Inst and Sequence Instances via their own channel ID
-  // Creating new channels could create Instances & Sequences, too - and deleting could do the same
-  // New instances could still be generated from Presets
-  //
-  // Create a new Instrument & new Sequence for each channel.
-  // Instead of useEffect, specifically update / dispose of Sequences directly when playing/editing?
+  // ToneJS-Controlled React State for visual Renders, etc
+  const { playing, setPlaying, setPlayHeadPosition } = useTransport();
 
   useEffect(
     () => {
-      console.log('trigger');
-      const sequence = createSequence({ Sequence, channels, instruments, setPlayHeadPosition }).start(0); // Generates a Sequence (Loop of Events) from Tone.JS
+      const sequence = createSequence({ channels, instruments, setPlayHeadPosition }).start(0); // Generates a Sequence (Loop of Events) from Tone.JS
 
       return () => sequence.dispose(); // Callback to kill sequenceLoop
     },
-    [channels, instruments, Sequence] // Retrigger whenever pattern changes
+    [channels, instruments, setPlayHeadPosition] // Retrigger whenever pattern changes
   );
 
   const mouseDown = useRef(false);
 
   const handlePlayToggle = () => {
-    Transport.toggle();
+    Tone.Transport.toggle();
     return setPlaying(playing => !playing);
   };
 
@@ -124,19 +110,18 @@ const Root = () => {
 
   const handleMoreBlips = () => {
     const newInstrument = createInstrumentFromPreset({
-      toneJs: Tone,
       presetId: INSTRUMENT_PRESETS[Math.floor(Math.random() * INSTRUMENT_PRESETS.length)].id,
     });
-    const instrumentId = `${newInstrument.presetId}__channel_${channels.length}`;
+    const channelId = `channel_${channels.length}`;
     const randArrangement = [...Array(16)].map(() => Math.round(Math.random() - 0.2));
 
     const newChannel = {
+      id: channelId,
       arrangement: randArrangement,
-      instrumentId: instrumentId,
       note: { root: 'C4', length: '8n' },
     };
 
-    setInstruments(oldInstruments => ({ ...oldInstruments, [instrumentId]: newInstrument }));
+    setInstruments(oldInstruments => ({ ...oldInstruments, [channelId]: newInstrument }));
     setChannels(oldChannels => [...oldChannels, newChannel]);
   };
 
@@ -154,35 +139,41 @@ const Root = () => {
     return setInstruments(initializeInstruments({ toneJs: Tone, channels: initialChannels }));
   };
 
+  const noteColors = chroma.scale(['#E67AD5', '#FFD639']).mode('lab').colors(channels.length);
+  const blankColors = chroma.scale(['#2AF598', '#08AEEA']).mode('lab').colors(channels.length);
+
   return (
     <MainLayout footer={<Header handlePlayToggle={handlePlayToggle} playing={playing} />}>
-      <Flex
+      <Channels
         width={1}
-        m="0.5em"
-        justifyContent="center"
-        flexWrap="wrap"
         onMouseDown={() => {
           mouseDown.current = true;
         }}
         onMouseUp={() => {
           mouseDown.current = false;
         }}
+        onTouchStart={() => {
+          mouseDown.current = true;
+        }}
+        onTouchEnd={() => {
+          mouseDown.current = false;
+        }}
       >
         {channels.map((channel, channelIndex) => (
           <Channel
-            key={`channel_${channelIndex}`}
             width={1}
+            key={`channel_${channelIndex}`}
             channel={channel}
-            setChannels={setChannels}
             channelIndex={channelIndex}
             instrument={instruments[channel.id]}
+            setChannels={setChannels}
             handleNoteClick={handleNoteClick}
-            totalChannels={channels.length}
-            playHeadPosition={playHeadPosition}
             mouseDown={mouseDown}
+            noteColor={noteColors[channelIndex]}
+            blankColor={blankColors[channelIndex]}
           />
         ))}
-      </Flex>
+      </Channels>
 
       <Flex alignItems="center">
         {channels.length < 9 && (
@@ -206,3 +197,9 @@ const Root = () => {
 };
 
 export { Root };
+
+const Channels = styled(Flex)`
+  margin: 0.5em;
+  justify-content: center;
+  flex-wrap: wrap;
+`;

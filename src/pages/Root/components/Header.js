@@ -1,12 +1,10 @@
 import React from 'react';
 import { Flex } from 'rebass';
 
-import { useTone } from 'audio/contexts/ToneContext';
+import { Master } from 'tone';
 import { Button, ToneFader } from 'components';
 
 const Header = ({ handlePlayToggle, playing }) => {
-  const { Master } = useTone();
-
   return (
     <Flex width={1} justifyContent="center" alignItems="center">
       <ToneFader width={[5 / 8, 2 / 16]} label="vol" instrument={Master} property="volume" />

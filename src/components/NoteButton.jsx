@@ -15,4 +15,10 @@ export { NoteButton };
 
 const StyledButton = styled(Button)`
   padding: 0;
+  background: ${({ noteVal, noteColor, blankColor }) => (noteVal ? noteColor : blankColor)};
+  opacity: ${({ noteActive }) => (noteActive ? 1 : 0.5)};
+  &:hover {
+    background: #e67ad4;
+    opacity: 1;
+  }
 `;

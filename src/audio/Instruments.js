@@ -1,3 +1,5 @@
+import Tone from 'tone';
+
 // Preset values for creating ToneJS Instruments.
 // 'presetId' is the name of the instrument used by a Channel
 // All other keys are ToneJS Specific
@@ -46,18 +48,18 @@ const INSTRUMENT_PRESETS = [
   },
 ];
 
-const createInstrumentFromPreset = ({ toneJs, presetId = 'MidTone' }) => {
+const createInstrumentFromPreset = ({ presetId = 'MidTone' }) => {
   const preset = INSTRUMENT_PRESETS.find(preset => preset.id === presetId);
-  const Instrument = toneJs[preset.name];
+  const Instrument = Tone[preset.name];
 
   return new Instrument(preset).toMaster();
 };
 
-const initializeInstruments = ({ toneJs, channels }) =>
+const initializeInstruments = ({ channels }) =>
   channels.reduce((acc, { id, presetId }) => {
     return {
       ...acc,
-      [id]: createInstrumentFromPreset({ toneJs, presetId: presetId }),
+      [id]: createInstrumentFromPreset({ presetId: presetId }),
     };
   }, {});
 

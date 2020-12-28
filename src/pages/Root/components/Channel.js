@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { useTone } from 'audio/contexts/ToneContext';
-import chroma from 'chroma-js';
+import Tone from 'tone';
 import { Flex } from 'rebass';
+
+import { useTransport } from 'contexts/TransportContext';
 
 import { NoteButton, Button, ToneFader } from 'components';
 
@@ -11,20 +12,17 @@ const Channel = ({
   channelIndex,
   instrument,
   handleNoteClick,
-  totalChannels,
-  playHeadPosition,
   mouseDown,
+  noteColor,
+  blankColor,
   ...props
 }) => {
-  const Tone = useTone();
+  const { playHeadPosition } = useTransport();
 
   const [showControls, setShowControls] = useState(false);
 
-  const noteColors = chroma.scale(['#E67AD5', '#FFD639']).mode('lab').colors(totalChannels);
-  const blankColors = chroma.scale(['#2AF598', '#08AEEA']).mode('lab').colors(totalChannels);
-
   return (
-    <Flex key={`channel${channelIndex}`} justifyContent="center" flexWrap="wrap" {...props}>
+    <Flex key={`channel_${channel.id}`} justifyContent="center" flexWrap="wrap" {...props}>
       <Flex alignItems="center">
         <Flex
           width={['14em', '30em', '30em', '60em']}
@@ -34,15 +32,15 @@ const Channel = ({
         >
           {channel.arrangement.map((noteVal, noteIndex) => (
             <NoteButton
-              key={`note${noteIndex}`}
+              key={`note_${noteIndex}`}
               onMouseDown={() => handleNoteClick({ channelIndex, noteIndex, noteVal })}
               onMouseEnter={() => {
                 mouseDown.current && handleNoteClick({ channelIndex, noteIndex, noteVal });
               }}
-              sx={{
-                background: noteVal ? noteColors[channelIndex] : blankColors[channelIndex],
-                opacity: playHeadPosition === noteIndex ? 1 : 0.5,
-              }}
+              noteVal={noteVal}
+              noteActive={playHeadPosition === noteIndex}
+              noteColor={noteColor}
+              blankColor={blankColor}
             />
           ))}
         </Flex>
